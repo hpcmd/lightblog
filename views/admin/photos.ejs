@@ -1,0 +1,14 @@
+<html>
+<link href="./stylesheets/style.css" rel="stylesheet">
+<!--Depecrated feature allowing to display photos from Unsplash API-->
+
+<body>
+    <ul class="photo-grid">
+        <% for(i=0;i<photoArray.length;i++){%>
+
+            <li><img src="<%=photoArray[i]%>"></li>
+            <%}%>
+    </ul>
+</body>
+
+</html>
