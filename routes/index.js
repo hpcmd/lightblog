@@ -3,17 +3,10 @@ var router = express.Router();
 var postModel = require('../models/post');
 var request = require('sync-request'); //getting API unsplash access
 
-//starting with creation of content
+//displaying articles on root
 
 router.get('/', function(req, res, next) {
-  // var queryPhoto = request("GET", "https://api.unsplash.com/search/photos?query=jeux-videos&fit=crop&client_id=bvLcBsY7B9y43773KumKpUWuFU6ec1Rv6hYzHyiMB3o&page=4&h=200");
-  // queryPhotoJSON = JSON.parse(queryPhoto.body)
-  // i=parseInt(Math.random()*10)
-  // photo=queryPhotoJSON.results[i].urls.thumb
-  // photoArray=[]
-  // for(var i=0;i<10;i++){
-  // photoArray.push(queryPhotoJSON.results[i].urls.thumb)
-  // }
+
   res.render('admin/create', { title: 'Express' });
 });
 
@@ -25,6 +18,7 @@ router.post('/add-post', async function(req, res, next) {
   i=parseInt(Math.random()*10)
   unsplashResult=queryPhotoJSON.results[i].urls.full
 
+  //model for post
   var newPost= new postModel({
     title:req.body.nameArticle,
     content:req.body.content,
@@ -53,6 +47,7 @@ router.post('/add-comment', async function(req, res, next) {
   res.redirect('back')
 });
 
+//displaying all posts created that are in the DB
 router.get('/getpost', async function(req, res, next) {
   var categories = await postModel.find().distinct('category')
   var post = await postModel.find().sort({datePublication:-1})
@@ -60,38 +55,37 @@ router.get('/getpost', async function(req, res, next) {
 
 });
 
+//displaying a post that was clicked and pushing DB information on that article to be displayed in frontend
 router.get('/getspecificpost', async function(req, res, next) {
   var categories = await postModel.find().distinct('category')
   var post= await postModel.findById(req.query.id)
   res.render('displaypost/detailpost', {post,categories,comment:post.commentaires})
 })
 
+
+//display category corresponding to click in the category widget
 router.get('/getcategory', async function(req, res, next) {
   var categories = await postModel.find().distinct('category')
   var post= await postModel.find({'category':req.query.name}).sort({datePublication:-1})
   res.render('displaypost/categorypost', {post,categories})
 })
 
+//display author corresponding to click in the subtitle of an article, could be also used for a author widget
 router.get('/getauthor', async function(req, res, next) {
   var categories = await postModel.find().distinct('category')
   var post= await postModel.find({'author':req.query.name}).sort({datePublication:-1})
   res.render('displaypost/authorpost', {post,categories})
 })
 
-
+//displaying all posts in the administration interface
 router.get('/admin-show-post',async function(req, res, next){
   var post = await postModel.find();
   res.render('admin/admin-posts',{post})
 })
-
+//allow to pre-fill in edit.ejs the information of a post to edit
 router.get('/edit-post', async function(req, res, next) {
   var editPost = await postModel.findById({_id:req.query.id})
     res.render('admin/edit',{editPost})
-});
-
-router.get('/delete-post', async function(req, res, next) {
-  var deletePost = await postModel.deleteOne({_id:req.query.id})
-    res.redirect('admin-show-post')
 });
 
 router.post('/submit-edit-post', async function(req, res, next) {
@@ -103,6 +97,11 @@ router.post('/submit-edit-post', async function(req, res, next) {
     author:req.body.nameAuthor,
     // image:unsplashResult, we are not yet allowing the user to pick manually his photo
     });
+    res.redirect('admin-show-post')
+});
+
+router.get('/delete-post', async function(req, res, next) {
+  var deletePost = await postModel.deleteOne({_id:req.query.id})
     res.redirect('admin-show-post')
 });
 
